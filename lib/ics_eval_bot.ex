@@ -7,14 +7,6 @@ defmodule IcsEvalBot do
   @compile_path "/compile.json"
   @request_url "#{@api_base_url}#{@compile_path}"
 
-  @command_to_compiler %{"ex" => "elixir-head"}
-
-  @help_message @command_to_compiler
-                |> Enum.map(fn {command, compiler} ->
-                  "/#{command} code -- #{compiler}"
-                end)
-                |> Enum.join("\n")
-
   use ExGram.Bot, name: Application.get_env(:ics_eval_bot, :name)
 
   require Logger
@@ -27,11 +19,18 @@ defmodule IcsEvalBot do
   end
 
   def handle({:command, :help, %{}}, cnt) do
-    reply(cnt, "List of commands:\n#{@help_message}")
+    help_message =
+      command_to_compiler()
+      |> Enum.map(fn {command, compiler} ->
+        "/#{command} code -- #{compiler}"
+      end)
+      |> Enum.join("\n")
+
+    reply(cnt, "List of commands:\n#{help_message}")
   end
 
-  def handle(asd = {:command, command, %{text: code}}, cnt) do
-    compiler = Map.get(@command_to_compiler, command)
+  def handle({:command, command, %{text: code}}, cnt) do
+    compiler = Map.get(command_to_compiler(), command)
 
     if compiler do
       try do
@@ -65,7 +64,14 @@ defmodule IcsEvalBot do
     {decoded["status"], decoded["program_message"]}
   end
 
-  def reply(cnt = %{update: %{message: %{message_id: message_id}}}, message) do
+  defp reply(cnt = %{update: %{message: %{message_id: message_id}}}, message) do
     answer(cnt, message, reply_to_message_id: message_id, parse_mode: "markdown")
+  end
+
+  defp command_to_compiler do
+    [{:command_to_compiler, command_to_compiler}] =
+      :ets.lookup(:command_to_compiler, :command_to_compiler)
+
+    command_to_compiler
   end
 end
