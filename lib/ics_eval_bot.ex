@@ -20,6 +20,10 @@ defmodule IcsEvalBot do
   command("start")
   command("help")
 
+  def handle({:command, "help@ics_eval_bot", %{}}, cnt) do
+    handle({:command, :help, %{}}, cnt)
+  end
+
   def handle({:command, :help, %{}}, cnt) do
     answer(cnt, @help_message, parse_mode: "markdown")
   end
