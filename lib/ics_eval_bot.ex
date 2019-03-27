@@ -9,9 +9,11 @@ defmodule IcsEvalBot do
 
   @command_to_compiler %{"ex" => "elixir-head"}
 
-  @help_message Enum.map(@command_to_compiler, fn {command, compiler} ->
-                  "/#{command} code -- #{compiler}\n"
+  @help_message @command_to_compiler
+                |> Enum.map(fn {command, compiler} ->
+                  "/#{command} code -- #{compiler}"
                 end)
+                |> Enum.join("\n")
 
   use ExGram.Bot, name: Application.get_env(:ics_eval_bot, :name)
 
@@ -25,28 +27,28 @@ defmodule IcsEvalBot do
   end
 
   def handle({:command, :help, %{}}, cnt) do
-    answer(cnt, @help_message, parse_mode: "markdown")
+    reply(cnt, "List of commands:\n#{@help_message}")
   end
 
-  def handle({:command, command, %{text: code}}, cnt) do
+  def handle(asd = {:command, command, %{text: code}}, cnt) do
+    IO.inspect(asd)
+    IO.inspect(cnt)
     compiler = Map.get(@command_to_compiler, command)
 
     if compiler do
       try do
         {status, output} = run(compiler, code)
-        answer(cnt, "Status code: #{status}\nOutput:\n`#{output}`", parse_mode: "markdown")
+
+        reply(cnt, "Status code: #{status}\nOutput:\n`#{output}`")
       rescue
         error ->
-          answer(
+          reply(
             cnt,
-            "An error occurred: `#{inspect(error)}`.\nPlease contact @indocomsoft about this.",
-            parse_mode: "markdown"
+            "An error occurred: `#{inspect(error)}`.\nPlease contact @indocomsoft about this."
           )
       end
     else
-      answer(cnt, "Unrecognised command. Run `/help` to get a list of commands.",
-        parse_mode: "markdown"
-      )
+      reply(cnt, "Unrecognised command. Run `/help` to get a list of commands.")
     end
   end
 
@@ -56,11 +58,16 @@ defmodule IcsEvalBot do
     Logger.info("cnt = #{inspect(cnt)}")
   end
 
-  defp run(compiler, code) do
+  defp run(compiler, code) when is_binary(compiler) and is_binary(code) do
+    Logger.info("compiler = #{compiler}, code = #{code}")
     body = Jason.encode!(%{compiler: compiler, code: code})
     headers = [{"Content-Type", "application/json"}]
     %HTTPoison.Response{body: body} = HTTPoison.post!(@request_url, body, headers)
     decoded = Jason.decode!(body)
     {decoded["status"], decoded["program_message"]}
+  end
+
+  def reply(cnt = %{update: %{message: %{message_id: message_id}}}, message) do
+    answer(cnt, message, reply_to_message_id: message_id, parse_mode: "markdown")
   end
 end
