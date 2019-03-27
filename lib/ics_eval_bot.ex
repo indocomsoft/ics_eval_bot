@@ -31,8 +31,6 @@ defmodule IcsEvalBot do
   end
 
   def handle(asd = {:command, command, %{text: code}}, cnt) do
-    IO.inspect(asd)
-    IO.inspect(cnt)
     compiler = Map.get(@command_to_compiler, command)
 
     if compiler do
