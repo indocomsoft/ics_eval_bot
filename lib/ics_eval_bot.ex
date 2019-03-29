@@ -29,7 +29,7 @@ defmodule IcsEvalBot do
     reply(cnt, "List of commands:\n#{help_message}")
   end
 
-  def handle({:command, command, %{text: code}}, cnt) do
+  def handle({:command, command, %{text: code, chat: %{type: type}}}, cnt) do
     compiler = Map.get(command_to_compiler(), command)
 
     if compiler do
@@ -45,14 +45,25 @@ defmodule IcsEvalBot do
           )
       end
     else
-      reply(cnt, "Unrecognised command. Run `/help` to get a list of commands.")
+      case type do
+        "private" ->
+          reply(cnt, "Unrecognised command. Run `/help` to get a list of commands.")
+
+        _ ->
+          nil
+      end
     end
   end
 
-  def handle(message, cnt) do
+  def handle(message = {_, _, %{chat: %{type: "private"}}}, cnt) do
     Logger.info("Unknown command.")
     Logger.info("message = #{inspect(message)}")
     Logger.info("cnt = #{inspect(cnt)}")
+    reply(cnt, "Run `/help` to get a list of commands.")
+  end
+
+  def handle(_message, _cnt) do
+    nil
   end
 
   defp run(compiler, code) when is_binary(compiler) and is_binary(code) do
