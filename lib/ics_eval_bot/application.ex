@@ -32,7 +32,6 @@ defmodule IcsEvalBot.Application do
     additional_command_to_compiler = %{
       "gcc" => "gcc-head-c",
       "clang" => "clang-head-c",
-      "ex" => "elixir-head",
       "rb" => "ruby-head"
     }
 
