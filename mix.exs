@@ -22,9 +22,10 @@ defmodule IcsEvalBot.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ex_gram, "~> 0.6"},
+      {:ex_gram, "~> 0.8"},
       {:httpoison, "~> 1.4"},
       {:jason, "~> 1.1"},
+      {:tesla, "~> 1.2"},
       {:dialyxir, "~> 1.0.0-rc.4", only: :dev, runtime: false},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
       {:excoveralls, "~> 0.10", only: :test},
