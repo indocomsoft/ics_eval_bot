@@ -31,4 +31,14 @@ config :ics_eval_bot, name: :ics_eval_bot
 #
 #     import_config "#{Mix.env()}.exs"
 
-import_config "secrets.exs"
+if Mix.env() == "prod" do
+  token =
+    System.get_env("TOKEN") ||
+      raise """
+      environment variable TOKEN is missing.
+      """
+
+  config :ex_gram, token: token
+else
+  import_config "secrets.exs"
+end
