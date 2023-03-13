@@ -23,7 +23,7 @@ defmodule IcsEvalBot.MixProject do
   defp deps do
     [
       {:ex_gram, "~> 0.8"},
-      {:httpoison, "~> 1.4"},
+      {:httpoison, "~> 2.1"},
       {:jason, "~> 1.1"},
       {:tesla, "~> 1.2"},
       {:dialyxir, "~> 1.1.0", only: :dev, runtime: false},
